@@ -83,9 +83,9 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
 
         <Card>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 1 }}>Mice (5 per cage)</Typography>
+            <Typography variant="h6" sx={{ mb: 1 }}>Subjects ({cageMice.length} in this cage)</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-              Click a row to open mouse details (events, trials, injections, care).
+              Click any row to view and edit subject details, add events, record measurements, and track treatments.
             </Typography>
 
             <TableContainer component={Paper} variant="outlined">
