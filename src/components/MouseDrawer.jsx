@@ -62,6 +62,16 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
     });
   };
 
+  const handleDelete = () => {
+    const confirm = window.confirm(
+      `Delete ${mouse.mouseId || `Mouse slot ${mouse.slot}`} and all its events? This cannot be undone.`
+    );
+    if (confirm) {
+      api.deleteMouse(mouse.id);
+      onClose();
+    }
+  };
+
   const title = mouse.mouseId ? mouse.mouseId : `Mouse slot ${mouse.slot}`;
 
   return (
@@ -74,7 +84,12 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
               {cage.name} • {cohort.name} • {group.name}
             </Typography>
           </Box>
-          <IconButton onClick={onClose}><CloseIcon /></IconButton>
+          <Stack direction="row" spacing={1}>
+            <IconButton onClick={handleDelete} color="error" title="Delete this subject">
+              <DeleteIcon />
+            </IconButton>
+            <IconButton onClick={onClose}><CloseIcon /></IconButton>
+          </Stack>
         </Stack>
 
         <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>

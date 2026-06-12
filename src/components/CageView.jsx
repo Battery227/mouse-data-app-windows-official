@@ -1,8 +1,9 @@
 import React from "react";
 import {
-  Box, Card, CardContent, Chip, Divider, MenuItem, Stack,
+  Box, Button, Card, CardContent, Chip, Divider, MenuItem, Stack,
   TextField, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { COHORTS, DRUGS, getCohort, getGroup } from "../models/cohorts";
 
 export default function CageView({ cage, mice, onSelectMouse, api }) {
@@ -83,10 +84,22 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
 
         <Card>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 1 }}>Subjects ({cageMice.length} in this cage)</Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-              Click any row to view and edit subject details, add events, record measurements, and track treatments.
-            </Typography>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Box>
+                <Typography variant="h6">Subjects ({cageMice.length} in this cage)</Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  Click any row to view and edit subject details, add events, record measurements, and track treatments.
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => api.addMouse(cage.id)}
+                size="small"
+              >
+                Add Subject
+              </Button>
+            </Stack>
 
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">

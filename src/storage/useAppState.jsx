@@ -12,21 +12,6 @@ function nowIso() {
 function defaultState() {
   const firstCohort = COHORTS[0];
   const cageId = uid("cage");
-  const mice = [];
-  for (let i = 1; i <= 5; i++) {
-    mice.push({
-      id: uid("mouse"),
-      cageId,
-      slot: i,
-      mouseId: "",
-      genotype: "",
-      drug: "",
-      status: "ALIVE", // ALIVE | KILLED
-      killedAt: null,
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
-    });
-  }
   return {
     version: 1,
     lastSavedAt: null,
@@ -44,8 +29,7 @@ function defaultState() {
         updatedAt: nowIso(),
       },
     ],
-    mice,
-    // Events are stored per mouse
+    mice: [], // Start with empty mice array - users add subjects as needed
     events: [],
   };
 }
@@ -117,22 +101,8 @@ export function useAppState() {
           createdAt: nowIso(),
           updatedAt: nowIso(),
         }];
-        const mice = [...prev.mice];
-        for (let i = 1; i <= 5; i++) {
-          mice.push({
-            id: uid("mouse"),
-            cageId,
-            slot: i,
-            mouseId: "",
-            genotype: "",
-            drug: "",
-            status: "ALIVE",
-            killedAt: null,
-            createdAt: nowIso(),
-            updatedAt: nowIso(),
-          });
-        }
-        return { ...prev, cages, mice };
+        // Don't auto-create mice - let users add subjects as needed
+        return { ...prev, cages };
       });
       return cageId;
     };
@@ -160,11 +130,45 @@ export function useAppState() {
       });
     };
 
-const updateMouse = (mouseId, patch) => {
+    const updateMouse = (mouseId, patch) => {
       updateState(prev => ({
         ...prev,
         mice: prev.mice.map(m => m.id === mouseId ? { ...m, ...patch, updatedAt: nowIso() } : m),
       }));
+    };
+
+    const addMouse = (cageId) => {
+      const mouseId = uid("mouse");
+      updateState(prev => {
+        const cageMice = prev.mice.filter(m => m.cageId === cageId);
+        const nextSlot = cageMice.length > 0 ? Math.max(...cageMice.map(m => m.slot)) + 1 : 1;
+        const newMouse = {
+          id: mouseId,
+          cageId,
+          slot: nextSlot,
+          mouseId: "",
+          genotype: "",
+          drug: "",
+          status: "ALIVE",
+          killedAt: null,
+          createdAt: nowIso(),
+          updatedAt: nowIso(),
+        };
+        return { ...prev, mice: [...prev.mice, newMouse] };
+      });
+      return mouseId;
+    };
+
+    const deleteMouse = (mouseId) => {
+      updateState(prev => {
+        const remainingMice = prev.mice.filter(m => m.id !== mouseId);
+        const remainingEvents = prev.events.filter(e => e.mouseId !== mouseId);
+        return {
+          ...prev,
+          mice: remainingMice,
+          events: remainingEvents,
+        };
+      });
     };
 
     const addEvent = (event) => {
@@ -220,7 +224,9 @@ const updateMouse = (mouseId, patch) => {
       addCage,
       updateCage,
       deleteCage,
+      addMouse,
       updateMouse,
+      deleteMouse,
       addEvent,
       updateEvent,
       deleteEvent,

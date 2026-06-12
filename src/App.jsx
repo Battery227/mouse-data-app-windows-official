@@ -197,26 +197,6 @@ export default function App() {
           onDeleteCage={(cageId) => handleDeleteCage(cageId)}
         />
 
-        {/* Extra affordance: when sidebar is hidden, show a small button on the left edge */}
-        {!sidebarOpen ? (
-          <IconButton
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Show cages sidebar"
-            sx={{
-              position: "fixed",
-              top: 80,
-              left: 8,
-              zIndex: 1400,
-              bgcolor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: 1,
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-        ) : null}
-
         <Box sx={{ flex: 1, mt: 8, ml: sidebarOpen ? "320px" : 0, transition: "margin-left 150ms ease" }}>
           {selectedCage ? (
             <CageView
