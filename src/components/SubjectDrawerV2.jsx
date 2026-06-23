@@ -156,7 +156,7 @@ export default function SubjectDrawerV2({
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
       <Box sx={{ width: 520, p: 2, display: "flex", flexDirection: "column", height: "100%" }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
           <Box>
             <Typography variant="h6">{title}</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -324,7 +324,7 @@ export default function SubjectDrawerV2({
                       alignItems: "flex-start"
                     }}
                   >
-                    <Stack direction="row" spacing={1} alignItems="center" sx={{ width: "100%", mb: 1 }}>
+                    <Stack direction="row" spacing={1} sx={{ width: "100%", mb: 1, alignItems: "center" }}>
                       <EventChip e={event} />
                       <Typography variant="body2" fontWeight="bold" sx={{ flex: 1 }}>
                         {event.fieldValues?.type || event.fieldValues?.category || "Event"}
@@ -391,9 +391,9 @@ export default function SubjectDrawerV2({
                             }}
                           >
                             <CardContent>
-                              <Stack direction="row" justifyContent="space-between" alignItems="start" sx={{ mb: 1 }}>
+                              <Stack direction="row" sx={{ mb: 1, justifyContent: "space-between", alignItems: "flex-start" }}>
                                 <Box sx={{ flex: 1 }}>
-                                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                                  <Stack direction="row" spacing={1} sx={{ mb: 0.5, alignItems: "center" }}>
                                     <Chip
                                       label={`Day ${event.day}`}
                                       size="small"

@@ -69,7 +69,7 @@ export default function ExperimentSwitcher({
     <>
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="h6">Experiments</Typography>
             <Button
               startIcon={<AddIcon />}
@@ -119,7 +119,7 @@ export default function ExperimentSwitcher({
                 >
                   <ListItemText
                     primary={
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                         <Typography>{exp.name}</Typography>
                         {exp.id === activeExperimentId && (
                           <CheckCircleIcon color="primary" fontSize="small" />

@@ -94,7 +94,7 @@ export default function HousingUnitView({
 
   return (
     <Box sx={{ p: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction="row" sx={{ mb: 3, justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h5">{housingUnit.name}</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -136,7 +136,7 @@ export default function HousingUnitView({
                 <Stack spacing={1}>
                   {subject ? (
                     <>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h6" component="div" fontWeight="bold">
                           {subject.subjectId || `Subject ${slot}`}
                         </Typography>

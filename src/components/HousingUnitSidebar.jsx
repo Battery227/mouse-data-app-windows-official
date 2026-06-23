@@ -98,7 +98,7 @@ export default function HousingUnitSidebar({
         }}
       >
         <Box sx={{ p: 2 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction="row" sx={{ mb: 2, justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="h6">Housing Units</Typography>
           </Stack>
 

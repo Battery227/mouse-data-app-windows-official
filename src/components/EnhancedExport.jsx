@@ -200,7 +200,7 @@ export default function EnhancedExport({
           {/* Experiment Selection */}
           {experiments.length > 0 && (
             <FormControl>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Stack direction="row" sx={{ mb: 1, justifyContent: "space-between", alignItems: "center" }}>
                 <FormLabel>Experiments</FormLabel>
                 <Stack direction="row" spacing={1}>
                   <Button size="small" onClick={selectAllExperiments}>

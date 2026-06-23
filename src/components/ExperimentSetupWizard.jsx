@@ -355,7 +355,7 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
                     sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 2, flexDirection: 'column', alignItems: 'stretch' }}
                   >
                     <Stack spacing={1} sx={{ width: '100%' }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                         <TextField
                           label="Cohort Name"
                           value={cohort.name}
@@ -394,7 +394,7 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
                       
                       {cohort.groups.map((group, groupIdx) => (
                         <Box key={group.id} sx={{ pl: 2, mb: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center">
+                          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                             <TextField
                               label="Group Name"
                               value={group.name}

@@ -139,7 +139,7 @@ export default function AppV2() {
               </IconButton>
             </Tooltip>
             
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ flex: 1 }}>
+            <Stack direction="row" spacing={2} sx={{ flex: 1, alignItems: "center" }}>
               <Typography variant="h6">InVivo Research Manager V2</Typography>
               
               {activeExperiment && (
@@ -167,7 +167,7 @@ export default function AppV2() {
               </Menu>
             </Stack>
   
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
               <Tooltip title={api?.canUndo ? "Undo" : "Nothing to undo"}>
                 <span>
                   <IconButton

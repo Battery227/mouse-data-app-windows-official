@@ -49,7 +49,7 @@ function TemplateCard({ template, onSelect, selected }) {
       onClick={() => onSelect(template)}
     >
       <CardContent sx={{ flex: 1 }}>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: "center" }}>
           {template.species?.icon && (
             <Typography variant="h4">{template.species.icon}</Typography>
           )}
@@ -163,7 +163,7 @@ export default function TemplateSelector({ open, onClose, onSelect, currentTempl
       PaperProps={{ sx: { height: '80vh' } }}
     >
       <DialogTitle>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h5">Select Experiment Template</Typography>
           <Tooltip title="Create custom template">
             <IconButton onClick={handleCreateCustom} color="primary">

@@ -117,7 +117,7 @@ export default function ScheduleTimeline({
   return (
     <Box>
       <Stack spacing={2} sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6">Global Experiment Schedule</Typography>
           <Button
             variant="contained"
@@ -213,9 +213,9 @@ export default function ScheduleTimeline({
                     }}
                   >
                     <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="start">
+                      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                          <Stack direction="row" spacing={1} sx={{ mb: 0.5, alignItems: "center" }}>
                             <Chip 
                               label={`Day ${event.day}`} 
                               size="small" 

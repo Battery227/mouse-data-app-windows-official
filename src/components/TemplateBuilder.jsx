@@ -371,7 +371,7 @@ export default function TemplateBuilderDialog({ open, onClose, onSave }) {
                 {eventTypes.map((event, index) => (
                   <ListItem key={event.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 2, flexDirection: 'column', alignItems: 'stretch' }}>
                     <Stack spacing={1} sx={{ width: '100%' }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                         <TextField
                           label="Event Name"
                           value={event.name}
