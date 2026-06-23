@@ -21,15 +21,6 @@ export const MOUSE_SPECIES: SpeciesConfig = {
   commonStrains: ['C57BL/6J', 'BALB/c', 'CD-1', 'FVB/N', '129S1/SvImJ'],
   defaultFields: [
     {
-      id: 'mouseId',
-      name: 'mouseId',
-      label: 'Mouse ID',
-      type: 'text',
-      required: true,
-      description: 'Unique identifier for this mouse',
-      placeholder: 'e.g., M001, A1-01'
-    },
-    {
       id: 'genotype',
       name: 'genotype',
       label: 'Genotype',
@@ -71,11 +62,21 @@ export const MOUSE_SPECIES: SpeciesConfig = {
       required: false
     },
     {
-      id: 'earTag',
-      name: 'earTag',
-      label: 'Ear Tag',
+      id: 'dod',
+      name: 'dod',
+      label: 'Date of Death',
+      type: 'date',
+      required: false,
+      description: 'Auto-filled when marked deceased; editable'
+    },
+    {
+      id: 'subjectIdentifier',
+      name: 'subjectIdentifier',
+      label: 'Subject Identifier',
       type: 'text',
-      required: false
+      required: false,
+      description: 'Your physical marking for this animal (e.g., tail marks, ear notch)',
+      placeholder: 'e.g., 1 tail line, L ear notch'
     }
   ]
 };

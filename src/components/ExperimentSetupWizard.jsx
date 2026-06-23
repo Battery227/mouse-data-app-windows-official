@@ -79,9 +79,9 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
   const [timelineDialogOpen, setTimelineDialogOpen] = useState(false);
   
   // Step 3: Subject Fields
-  const [subjectFields, setSubjectFields] = useState(editingExperiment?.config?.subjectFields || [
-    { id: 'id', name: 'id', label: 'ID', type: 'text', required: true, placeholder: 'e.g., M001, A1' }
-  ]);
+  // The built-in "Mouse ID" (subject identifier) always exists, so no redundant
+  // default ID field here. Users add extra fields (genotype, sex, etc.) as needed.
+  const [subjectFields, setSubjectFields] = useState(editingExperiment?.config?.subjectFields || []);
   const [editingField, setEditingField] = useState(null);
   const [fieldDialogOpen, setFieldDialogOpen] = useState(false);
   
@@ -102,7 +102,7 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
       case 1:
         return cohorts.length > 0 && cohorts.every(c => c.name && c.groups.length > 0);
       case 2:
-        return subjectFields.length > 0 && subjectFields.every(f => f.label && f.name);
+        return subjectFields.every(f => f.label && f.name);
       case 3:
         return true; // Event types are optional
       default:
@@ -120,7 +120,6 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
         if (!cohorts.every(c => c.groups.length > 0)) return 'Each cohort must have at least one group';
         return '';
       case 2:
-        if (subjectFields.length === 0) return 'At least one subject field is required';
         if (!subjectFields.every(f => f.label && f.name)) return 'All fields must have a label and name';
         return '';
       default:

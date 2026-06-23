@@ -62,6 +62,12 @@ export default function HousingUnitView({
     return { slot, subject };
   });
 
+  const fieldLabels = React.useMemo(() => {
+    const map = {};
+    (template?.species?.defaultFields || []).forEach((f) => { map[f.id] = f.label; });
+    return map;
+  }, [template]);
+
   const handleAddSubject = () => {
     if (atCapacity) return;
     // Find first empty slot
@@ -112,7 +118,7 @@ export default function HousingUnitView({
 
       <Grid container spacing={2}>
         {slots.map(({ slot, subject }) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={slot}>
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={slot}>
             <Card
               sx={{
                 cursor: subject ? 'pointer' : 'default',
@@ -157,13 +163,14 @@ export default function HousingUnitView({
 
                       {subject.customFieldValues && Object.keys(subject.customFieldValues).length > 0 && (
                         <Box sx={{ mt: 1 }}>
-                          {Object.entries(subject.customFieldValues).slice(0, 2).map(([key, value]) => (
-                            value && (
-                              <Typography key={key} variant="caption" display="block" color="text.secondary">
-                                {key}: {String(value).substring(0, 20)}
+                          {Object.entries(subject.customFieldValues)
+                            .filter(([, value]) => value !== '' && value !== null && value !== undefined)
+                            .slice(0, 2)
+                            .map(([key, value]) => (
+                              <Typography key={key} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                {fieldLabels[key] || key}: {String(value).substring(0, 20)}
                               </Typography>
-                            )
-                          ))}
+                            ))}
                         </Box>
                       )}
                     </>

@@ -32,7 +32,6 @@ import {
   DialogActions,
   Chip
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -101,9 +100,6 @@ export default function HousingUnitSidebar({
         <Box sx={{ p: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">Housing Units</Typography>
-            <IconButton onClick={onClose} size="small">
-              <CloseIcon />
-            </IconButton>
           </Stack>
 
           <Button
@@ -164,6 +160,7 @@ export default function HousingUnitSidebar({
                     >
                       <ListItemText
                         primary={unit.name}
+                        slotProps={{ secondary: { component: 'div' } }}
                         secondary={
                           <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                             <Chip

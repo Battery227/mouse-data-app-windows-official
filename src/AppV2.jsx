@@ -125,9 +125,15 @@ export default function AppV2() {
             <Tooltip title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}>
               <IconButton
                 edge="start"
-                color="inherit"
                 onClick={() => setSidebarOpen(v => !v)}
-                sx={{ mr: 1 }}
+                sx={{
+                  mr: 1.5,
+                  bgcolor: 'background.paper',
+                  color: 'primary.main',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'grey.100' }
+                }}
               >
                 <MenuIcon />
               </IconButton>
@@ -294,13 +300,8 @@ export default function AppV2() {
                 return newId;
               }}
               onDeleteSubject={(subjectId) => {
-                const subject = subjects.find(s => s.id === subjectId);
-                const ok = window.confirm(
-                  `Delete subject "${subject?.subject?.identifier || 'Unknown'}" and all associated events? This cannot be undone.`
-                );
-                if (ok) {
-                  api.deleteSubject(subjectId);
-                }
+                // HousingUnitView already confirms before calling this.
+                api.deleteSubject(subjectId);
               }}
             />
           ) : (

@@ -105,7 +105,7 @@ export default function EventDialogV2({
             value={isoToLocalInput(datetime)}
             onChange={(e) => setDatetime(localInputToIso(e.target.value))}
             fullWidth
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
 
           <TextField

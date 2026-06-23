@@ -181,8 +181,10 @@ export default function TemplateSelector({ open, onClose, onSelect, currentTempl
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             size="small"
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              }
             }}
           />
 
@@ -204,7 +206,7 @@ export default function TemplateSelector({ open, onClose, onSelect, currentTempl
             ) : (
               <Grid container spacing={2}>
                 {filteredTemplates.map((template) => (
-                  <Grid item xs={12} sm={6} md={4} key={template.id}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
                     <TemplateCard
                       template={template}
                       onSelect={setSelectedTemplate}

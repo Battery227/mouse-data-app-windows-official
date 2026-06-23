@@ -2,6 +2,9 @@
  * Dynamic Field Renderer
  * Renders any field type based on FieldDefinition
  * Supports all field types with validation
+ *
+ * NOTE: Uses MUI v9 `slotProps` API (InputProps / InputLabelProps / inputProps
+ * were removed in v9 and would otherwise leak onto the DOM).
  */
 
 import React from 'react';
@@ -22,10 +25,10 @@ import {
 /**
  * Render a single field based on its definition
  */
-export default function DynamicField({ 
-  field, 
-  value, 
-  onChange, 
+export default function DynamicField({
+  field,
+  value,
+  onChange,
   error,
   disabled = false,
   allValues = {} // For conditional fields
@@ -42,12 +45,27 @@ export default function DynamicField({
     onChange(field.id, newValue);
   };
 
-  const commonProps = {
+  const helpText = error || field.helpText || field.description;
+
+  // Props valid on a MUI TextField
+  const textFieldProps = {
     disabled,
     error: Boolean(error),
-    helperText: error || field.helpText || field.description,
+    helperText: helpText,
     fullWidth: true,
   };
+
+  // Props valid on a MUI FormControl (no helperText/placeholder)
+  const formControlProps = {
+    disabled,
+    error: Boolean(error),
+    fullWidth: true,
+    required: field.required,
+  };
+
+  const unitAdornment = field.unit
+    ? { endAdornment: <Box sx={{ ml: 1, color: 'text.secondary' }}>{field.unit}</Box> }
+    : undefined;
 
   // Render based on field type
   switch (field.type) {
@@ -56,23 +74,21 @@ export default function DynamicField({
     case 'url':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           type={field.type}
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={field.placeholder}
           required={field.required}
-          InputProps={{
-            endAdornment: field.unit ? <Box sx={{ ml: 1, color: 'text.secondary' }}>{field.unit}</Box> : null
-          }}
+          slotProps={{ input: unitAdornment }}
         />
       );
 
     case 'textarea':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
@@ -87,7 +103,7 @@ export default function DynamicField({
     case 'number':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           type="number"
           value={value ?? ''}
@@ -97,13 +113,13 @@ export default function DynamicField({
           }}
           placeholder={field.placeholder}
           required={field.required}
-          inputProps={{
-            min: field.validation?.min,
-            max: field.validation?.max,
-            step: 'any'
-          }}
-          InputProps={{
-            endAdornment: field.unit ? <Box sx={{ ml: 1, color: 'text.secondary' }}>{field.unit}</Box> : null
+          slotProps={{
+            htmlInput: {
+              min: field.validation?.min,
+              max: field.validation?.max,
+              step: 'any'
+            },
+            input: unitAdornment
           }}
         />
       );
@@ -111,45 +127,45 @@ export default function DynamicField({
     case 'date':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           type="date"
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
       );
 
     case 'datetime':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           type="datetime-local"
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
       );
 
     case 'time':
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           type="time"
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
       );
 
     case 'select':
       return (
-        <FormControl {...commonProps} required={field.required}>
+        <FormControl {...formControlProps}>
           <InputLabel>{field.label}</InputLabel>
           <Select
             value={value || ''}
@@ -163,9 +179,9 @@ export default function DynamicField({
               </MenuItem>
             ))}
           </Select>
-          {(error || field.helpText) && (
+          {helpText && (
             <FormHelperText error={Boolean(error)}>
-              {error || field.helpText}
+              {helpText}
             </FormHelperText>
           )}
         </FormControl>
@@ -173,7 +189,7 @@ export default function DynamicField({
 
     case 'multiselect':
       return (
-        <FormControl {...commonProps} required={field.required}>
+        <FormControl {...formControlProps}>
           <InputLabel>{field.label}</InputLabel>
           <Select
             multiple
@@ -195,9 +211,9 @@ export default function DynamicField({
               </MenuItem>
             ))}
           </Select>
-          {(error || field.helpText) && (
+          {helpText && (
             <FormHelperText error={Boolean(error)}>
-              {error || field.helpText}
+              {helpText}
             </FormHelperText>
           )}
         </FormControl>
@@ -205,7 +221,7 @@ export default function DynamicField({
 
     case 'checkbox':
       return (
-        <FormControl {...commonProps}>
+        <FormControl {...formControlProps}>
           <FormControlLabel
             control={
               <Checkbox
@@ -216,9 +232,9 @@ export default function DynamicField({
             }
             label={field.label}
           />
-          {(error || field.helpText) && (
+          {helpText && (
             <FormHelperText error={Boolean(error)}>
-              {error || field.helpText}
+              {helpText}
             </FormHelperText>
           )}
         </FormControl>
@@ -227,7 +243,7 @@ export default function DynamicField({
     default:
       return (
         <TextField
-          {...commonProps}
+          {...textFieldProps}
           label={field.label}
           value={value || ''}
           onChange={(e) => handleChange(e.target.value)}
@@ -241,12 +257,12 @@ export default function DynamicField({
 /**
  * Render multiple fields as a form
  */
-export function DynamicForm({ 
-  fields, 
-  values, 
-  onChange, 
+export function DynamicForm({
+  fields,
+  values,
+  onChange,
   errors = {},
-  disabled = false 
+  disabled = false
 }) {
   const handleFieldChange = (fieldId, value) => {
     onChange({ ...values, [fieldId]: value });

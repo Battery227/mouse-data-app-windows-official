@@ -282,7 +282,7 @@ export default function ScheduleTimeline({
               <MenuItem value="injection">Injection</MenuItem>
               <MenuItem value="test">Test/Assay</MenuItem>
               <MenuItem value="care">Care/Monitoring</MenuItem>
-              <MenuItem value="death">Endpoint</MenuItem>
+              <MenuItem value="death">Death</MenuItem>
               <MenuItem value="note">Note</MenuItem>
             </TextField>
 

@@ -121,15 +121,18 @@ export default function SubjectDrawerV2({
 
   const markDeceased = () => {
     const ts = new Date().toISOString();
-    api.updateSubject(subject.id, { 
-      status: 'deceased', 
-      statusDate: ts 
+    api.updateSubject(subject.id, {
+      status: 'deceased',
+      statusDate: ts
     });
+    // Record Date of Death in the subject's fields (pre-filled, editable afterward)
+    api.updateSubjectFields(subject.id, { dod: ts.split('T')[0] });
+    setFieldValues(prev => ({ ...prev, dod: ts.split('T')[0] }));
     api.addEvent({
       subjectId: subject.id,
-      eventTypeId: 'death-endpoint',
+      eventTypeId: 'death',
       datetime: ts,
-      fieldValues: { category: 'death', type: 'Endpoint' },
+      fieldValues: { category: 'death', type: 'Death' },
       notes: "Marked as deceased"
     });
   };
@@ -157,7 +160,7 @@ export default function SubjectDrawerV2({
           <Box>
             <Typography variant="h6">{title}</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {housingUnit?.name} • {experiment?.name}
+              {[housingUnit?.name, experiment?.name].filter(Boolean).join("  •  ")}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1}>
@@ -190,7 +193,7 @@ export default function SubjectDrawerV2({
           {tab === 0 && (
             <Stack spacing={2}>
               <TextField
-                label="Subject ID"
+                label="Mouse ID"
                 value={subject.subjectId}
                 onChange={(e) => api.updateSubject(subject.id, { subjectId: e.target.value })}
                 fullWidth
@@ -256,7 +259,7 @@ export default function SubjectDrawerV2({
                     value={subject.startDate ? subject.startDate.split('T')[0] : ''}
                     onChange={(e) => api.updateSubject(subject.id, { startDate: e.target.value ? new Date(e.target.value).toISOString() : null })}
                     fullWidth
-                    InputLabelProps={{ shrink: true }}
+                    slotProps={{ inputLabel: { shrink: true } }}
                     helperText="When this subject started in the experiment (for timeline tracking)"
                   />
                 </>
@@ -323,8 +326,8 @@ export default function SubjectDrawerV2({
                   >
                     <Stack direction="row" spacing={1} alignItems="center" sx={{ width: "100%", mb: 1 }}>
                       <EventChip e={event} />
-                      <Typography variant="body2" sx={{ flex: 1 }}>
-                        {fmt(event.datetime)}
+                      <Typography variant="body2" fontWeight="bold" sx={{ flex: 1 }}>
+                        {event.fieldValues?.type || event.fieldValues?.category || "Event"}
                       </Typography>
                       <IconButton
                         size="small"
@@ -334,6 +337,9 @@ export default function SubjectDrawerV2({
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                      {fmt(event.datetime)}
+                    </Typography>
                     {event.notes && (
                       <Typography variant="body2" color="text.secondary">
                         {event.notes}
@@ -454,7 +460,7 @@ export default function SubjectDrawerV2({
                       label="Start Date"
                       type="date"
                       fullWidth
-                      InputLabelProps={{ shrink: true }}
+                      slotProps={{ inputLabel: { shrink: true } }}
                       onChange={(e) => api.updateSubject(subject.id, { startDate: e.target.value })}
                     />
                   </CardContent>
