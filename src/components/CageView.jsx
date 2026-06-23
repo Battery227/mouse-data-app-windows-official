@@ -6,15 +6,20 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { COHORTS, DRUGS, getCohort, getGroup } from "../models/cohorts";
 
-export default function CageView({ cage, mice, onSelectMouse, api }) {
-  const cohort = getCohort(cage.cohortId);
-  const group = getGroup(cage.cohortId, cage.groupId);
+export default function CageView({ cage, mice, onSelectMouse, api, experimentConfig }) {
+  // Try to get cohort/group from experiment config first, then fall back to COHORTS
+  const availableCohorts = experimentConfig?.config?.cohorts || COHORTS;
+  const cohort = availableCohorts.find(c => c.id === cage.cohortId) || getCohort(cage.cohortId);
+  const group = cohort?.groups?.find(g => g.id === cage.groupId) || getGroup(cage.cohortId, cage.groupId);
 
   const updateCage = (patch) => api.updateCage(cage.id, patch);
 
   const cageMice = mice
     .filter(m => m.cageId === cage.id)
     .sort((a, b) => a.slot - b.slot);
+
+  const capacity = cage.capacity || 10;
+  const atCapacity = cageMice.length >= capacity;
 
   return (
     <Box sx={{ p: 2 }}>
@@ -38,12 +43,12 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
                   label="Cohort"
                   value={cage.cohortId}
                   onChange={(e) => {
-                    const newC = COHORTS.find(c => c.id === e.target.value) || COHORTS[0];
+                    const newC = availableCohorts.find(c => c.id === e.target.value) || availableCohorts[0];
                     updateCage({ cohortId: newC.id, groupId: newC.groups[0].id });
                   }}
                   sx={{ flex: 1 }}
                 >
-                  {COHORTS.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+                  {availableCohorts.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
                 </TextField>
 
                 <TextField
@@ -54,7 +59,7 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
                   onChange={(e) => updateCage({ groupId: e.target.value })}
                   sx={{ flex: 1 }}
                 >
-                  {cohort.groups.map(g => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+                  {(cohort?.groups || []).map(g => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
                 </TextField>
 
                 <TextField
@@ -73,12 +78,21 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Cohort summary
-            </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {cohort.description}
-            </Typography>
+            {cohort?.description && (
+              <>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  Cohort summary
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {cohort.description}
+                </Typography>
+              </>
+            )}
+            {group?.description && (
+              <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
+                <strong>Group:</strong> {group.description}
+              </Typography>
+            )}
           </CardContent>
         </Card>
 
@@ -86,7 +100,7 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
           <CardContent>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
               <Box>
-                <Typography variant="h6">Subjects ({cageMice.length} in this cage)</Typography>
+                <Typography variant="h6">Subjects ({cageMice.length} / {capacity})</Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Click any row to view and edit subject details, add events, record measurements, and track treatments.
                 </Typography>
@@ -96,6 +110,8 @@ export default function CageView({ cage, mice, onSelectMouse, api }) {
                 startIcon={<AddIcon />}
                 onClick={() => api.addMouse(cage.id)}
                 size="small"
+                disabled={atCapacity}
+                title={atCapacity ? `Cage at capacity (${capacity})` : 'Add new subject'}
               >
                 Add Subject
               </Button>

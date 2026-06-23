@@ -7,6 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DRUGS, TEST_TYPES, getCohort, getGroup } from "../models/cohorts";
+import { SUBJECT_STATUS, normalizeStatus } from "../models/constants";
 import EventDialog from "./EventDialog";
 
 function fmt(iso) {
@@ -29,9 +30,11 @@ function EventChip({ e }) {
   return <Chip size="small" color={color} label={label} sx={{ mr: 1 }} />;
 }
 
-export default function MouseDrawer({ open, onClose, cage, mouse, events, api }) {
-  const cohort = getCohort(cage.cohortId);
-  const group = getGroup(cage.cohortId, cage.groupId);
+export default function MouseDrawer({ open, onClose, cage, mouse, events, api, experimentConfig }) {
+  // Try to get cohort/group from experiment config first
+  const availableCohorts = experimentConfig?.config?.cohorts || [];
+  const cohort = availableCohorts.find(c => c.id === cage.cohortId) || getCohort(cage.cohortId);
+  const group = cohort?.groups?.find(g => g.id === cage.groupId) || getGroup(cage.cohortId, cage.groupId);
 
   const [tab, setTab] = React.useState(0);
   const [eventDialogOpen, setEventDialogOpen] = React.useState(false);
@@ -50,7 +53,7 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
 
   const markKilled = () => {
     const ts = new Date().toISOString();
-    setMouse({ status: "KILLED", killedAt: ts });
+    setMouse({ status: SUBJECT_STATUS.DECEASED, killedAt: ts });
     api.addEvent({
       mouseId: mouse.id,
       category: "KILL",
@@ -58,7 +61,7 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
       datetime: ts,
       fields: {},
       trials: [],
-      notes: "Marked as KILLED",
+      notes: "Marked as deceased",
     });
   };
 
@@ -93,7 +96,13 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
         </Stack>
 
         <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-          {mouse.status === "KILLED" ? <Chip color="error" label="KILLED" /> : <Chip color="success" label="ALIVE" />}
+          {normalizeStatus(mouse.status) === SUBJECT_STATUS.DECEASED ? (
+            <Chip color="error" label="DECEASED" />
+          ) : normalizeStatus(mouse.status) === SUBJECT_STATUS.REMOVED ? (
+            <Chip color="warning" label="REMOVED" />
+          ) : (
+            <Chip color="success" label="ALIVE" />
+          )}
           {mouse.drug ? <Chip color="info" label={mouse.drug} /> : <Chip variant="outlined" label="Drug: (unset)" />}
         </Stack>
 
@@ -265,6 +274,7 @@ export default function MouseDrawer({ open, onClose, cage, mouse, events, api })
           mouse={mouse}
           cohort={cohort}
           group={group}
+          experimentConfig={experimentConfig}
         />
       </Box>
     </Drawer>

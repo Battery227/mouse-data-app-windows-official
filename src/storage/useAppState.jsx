@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { idbGet, idbSet } from "./idb";
+import { idbGet, idbSet, getStorageInfo } from "./idb";
 import { uid } from "../utils/ids";
 import { COHORTS } from "../models/cohorts";
 
@@ -23,6 +23,7 @@ function defaultState() {
         name: "Cage 1",
         cohortId: firstCohort.id,
         groupId: firstCohort.groups[0].id,
+        capacity: 10, // Default capacity
         drug: "",
         notes: "",
         createdAt: nowIso(),
@@ -51,19 +52,35 @@ export function useAppState() {
     let mounted = true;
     (async () => {
       try {
+        // Log storage info on startup
+        const storageInfo = await getStorageInfo();
+        console.log('📦 Storage initialized:', storageInfo);
+        
         const loaded = await idbGet(STORAGE_KEY);
         if (!mounted) return;
+        
         if (loaded && loaded.version) {
+          console.log('✅ Loaded existing state from storage');
           setState(loaded);
           setSaveStatus("saved");
         } else {
+          console.log('🆕 Creating fresh state');
           const fresh = defaultState();
           setState(fresh);
-          setSaveStatus("saved");
-          await idbSet(STORAGE_KEY, fresh);
+          
+          // Try to save initial state and check if it worked
+          const saveSuccess = await idbSet(STORAGE_KEY, fresh);
+          if (!saveSuccess) {
+            console.warn("⚠️ Storage unavailable - running in memory-only mode");
+            console.warn("Data will be lost on reload. Export frequently!");
+            setSaveStatus("error");
+          } else {
+            console.log('✅ Initial state saved successfully');
+            setSaveStatus("saved");
+          }
         }
       } catch (e) {
-        console.error(e);
+        console.error("❌ Storage initialization error:", e);
         // fallback to default in memory
         const fresh = defaultState();
         if (mounted) {
@@ -96,6 +113,7 @@ export function useAppState() {
           name,
           cohortId,
           groupId: cohort.groups[0].id,
+          capacity: 10, // Default capacity
           drug: "",
           notes: "",
           createdAt: nowIso(),
@@ -141,7 +159,12 @@ export function useAppState() {
       const mouseId = uid("mouse");
       updateState(prev => {
         const cageMice = prev.mice.filter(m => m.cageId === cageId);
-        const nextSlot = cageMice.length > 0 ? Math.max(...cageMice.map(m => m.slot)) + 1 : 1;
+        // Find the first available slot (fill gaps from deletions)
+        const usedSlots = new Set(cageMice.map(m => m.slot));
+        let nextSlot = 1;
+        while (usedSlots.has(nextSlot)) {
+          nextSlot++;
+        }
         const newMouse = {
           id: mouseId,
           cageId,
@@ -243,11 +266,17 @@ export function useAppState() {
     saveTimer.current = setTimeout(async () => {
       try {
         const toSave = { ...state, lastSavedAt: nowIso() };
-        await idbSet(STORAGE_KEY, toSave);
-        setState(toSave);
-        setSaveStatus("saved");
+        const saveSuccess = await idbSet(STORAGE_KEY, toSave);
+        
+        if (saveSuccess) {
+          setState(toSave);
+          setSaveStatus("saved");
+        } else {
+          console.error("Storage write failed - data not persisted");
+          setSaveStatus("error");
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Storage error:", e);
         setSaveStatus("error");
       }
     }, 350);

@@ -1,7 +1,7 @@
 import React from "react";
 import {
   Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
-  MenuItem, Stack, TextField, Typography
+  MenuItem, Stack, TextField, Typography, Alert
 } from "@mui/material";
 import { DRUGS, EVENT_TYPES, TEST_TYPES } from "../models/cohorts";
 import TrialsEditor from "./TrialsEditor";
@@ -17,7 +17,7 @@ function localInputToIso(val) {
   return d.toISOString();
 }
 
-export default function EventDialog({ open, onClose, onCreate, mouse, cohort, group }) {
+export default function EventDialog({ open, onClose, onCreate, mouse, cohort, group, experimentConfig }) {
   const [category, setCategory] = React.useState("TEST");
   const [type, setType] = React.useState("RotaRod");
   const [datetime, setDatetime] = React.useState(() => new Date().toISOString());
@@ -25,15 +25,39 @@ export default function EventDialog({ open, onClose, onCreate, mouse, cohort, gr
   const [fields, setFields] = React.useState({});
   const [trials, setTrials] = React.useState([]);
 
+  // Get event types from experiment config if available
+  const availableEventTypes = experimentConfig?.config?.eventTypes || [];
+  const hasCustomEventTypes = availableEventTypes.length > 0;
+
   React.useEffect(() => {
     if (!open) return;
     setCategory("TEST");
-    setType("RotaRod");
+    // Set initial type based on available event types
+    if (hasCustomEventTypes) {
+      const testEvents = availableEventTypes.filter(et => et.category === 'test');
+      setType(testEvents[0]?.name || "RotaRod");
+    } else {
+      setType("RotaRod");
+    }
     setDatetime(new Date().toISOString());
     setNotes("");
     setFields({});
     setTrials([]);
-  }, [open]);
+  }, [open, hasCustomEventTypes, availableEventTypes]);
+
+  // Update type when category changes to ensure valid selection
+  React.useEffect(() => {
+    if (category === "TEST") {
+      if (hasCustomEventTypes) {
+        const testEvents = availableEventTypes.filter(et => et.category === 'test');
+        if (testEvents.length > 0 && !testEvents.find(et => et.name === type)) {
+          setType(testEvents[0].name);
+        }
+      } else if (!TEST_TYPES.find(t => t.value === type)) {
+        setType("RotaRod");
+      }
+    }
+  }, [category, type, hasCustomEventTypes, availableEventTypes]);
 
   const handleCreate = () => {
     onCreate({
@@ -54,12 +78,12 @@ export default function EventDialog({ open, onClose, onCreate, mouse, cohort, gr
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Event</DialogTitle>
+      <DialogTitle>Add Event for {mouse.mouseId || `Slot ${mouse.slot}`}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            Mouse: <b>{mouse.mouseId || `Slot ${mouse.slot}`}</b> • Cage cohort: <b>{cohort.name}</b> • Group: <b>{group.name}</b>
-          </Typography>
+          <Alert severity="info" sx={{ mb: 1 }}>
+            Recording event for <b>{mouse.mouseId || `Slot ${mouse.slot}`}</b> in <b>{cohort.name}</b> • <b>{group.name}</b>
+          </Alert>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
@@ -90,8 +114,28 @@ export default function EventDialog({ open, onClose, onCreate, mouse, cohort, gr
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 sx={{ flex: 1 }}
+                SelectProps={{
+                  displayEmpty: false
+                }}
+                helperText={hasCustomEventTypes ? "From experiment setup" : "Default test types"}
               >
-                {TEST_TYPES.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                {hasCustomEventTypes ? (
+                  // Use experiment-defined event types
+                  availableEventTypes
+                    .filter(et => et.category === 'test')
+                    .map(et => (
+                      <MenuItem key={et.id} value={et.name}>
+                        {et.name}
+                      </MenuItem>
+                    ))
+                ) : (
+                  // Fall back to default TEST_TYPES
+                  TEST_TYPES.map(o => (
+                    <MenuItem key={o.value} value={o.value}>
+                      {o.label}
+                    </MenuItem>
+                  ))
+                )}
               </TextField>
               {type === "Custom" ? (
                 <TextField
@@ -99,6 +143,8 @@ export default function EventDialog({ open, onClose, onCreate, mouse, cohort, gr
                   value={fields.customName || ""}
                   onChange={(e) => setFields(prev => ({ ...prev, customName: e.target.value }))}
                   sx={{ flex: 1 }}
+                  placeholder="Enter test name"
+                  required
                 />
               ) : null}
             </Stack>
@@ -179,7 +225,13 @@ export default function EventDialog({ open, onClose, onCreate, mouse, cohort, gr
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleCreate}>Add</Button>
+        <Button
+          variant="contained"
+          onClick={handleCreate}
+          disabled={category === "TEST" && type === "Custom" && !fields.customName}
+        >
+          Add Event
+        </Button>
       </DialogActions>
     </Dialog>
   );

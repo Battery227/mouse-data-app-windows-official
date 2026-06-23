@@ -2,6 +2,60 @@
 
 A fully customizable, cross-platform application for managing any type of in vivo research. Works with mice, zebrafish, rats, flies, worms, primates, and any other species - completely customizable without code changes.
 
+## ⚠️ IMPORTANT: Current Status & Known Limitations
+
+**DO NOT USE FOR PRODUCTION DATA YET**
+
+This application is currently undergoing critical fixes based on a comprehensive code audit. While the core architecture is solid, there are known issues that make it unsafe for real experiment data:
+
+### Critical Issues Being Fixed
+1. **Browser Mode Storage** - Data persistence is broken in browser/dev mode. Data will be lost on reload.
+2. **False Save Indicators** - The app may show "Saved" when data is not actually persisted.
+3. **Data Model Migration** - V1 and V2 data models are not fully integrated.
+
+### Safe Usage
+- ✅ **Desktop App (Tauri)** - More reliable but still being tested
+- ⚠️ **Browser Mode** - DO NOT USE for real data (memory-only, data lost on reload)
+- ✅ **Export Frequently** - Always export your data as backup
+
+### What's Working
+- ✅ Template system architecture (backend complete)
+- ✅ Data validation system
+- ✅ Export/Import functionality
+- ✅ UI components and forms
+
+### What's Being Fixed (Phase 0-2, ~2-3 weeks)
+- 🔧 Storage layer with proper browser/desktop detection
+- 🔧 Honest save status indicators
+- 🔧 Complete V2 data model integration
+- 🔧 Comprehensive test suite
+- 🔧 Documentation accuracy
+
+**See [AUDIT_ANALYSIS.md](AUDIT_ANALYSIS.md) for complete details and remediation plan.**
+
+## 📚 V2 Data Model
+
+This application uses a **V2 data model** with a specific structure. All developers must follow this structure to prevent bugs.
+
+### Quick Reference
+
+```javascript
+// ✅ CORRECT V2 Structure
+subject.subjectId              // Human-readable ID
+subject.status = "alive"       // Lowercase status
+subject.customFieldValues      // Custom fields object
+
+// ❌ WRONG (V1 or incorrect)
+subject.subject.identifier     // Wrong nesting
+subject.status = "ALIVE"       // Wrong case
+subject.genotype               // Wrong location
+```
+
+**📖 See [V2_MIGRATION_GUIDE.md](V2_MIGRATION_GUIDE.md) for complete documentation.**
+
+
+---
+
 ## 🌟 Key Features
 
 ### Universal Compatibility
@@ -215,6 +269,17 @@ Built for researchers, by researchers. Designed to adapt to YOUR needs, not forc
 
 ---
 
-**Version**: 2.0.0  
-**Status**: Production Ready  
+**Version**: 2.0.0-alpha
+**Status**: ⚠️ ALPHA - Not Production Ready (See warnings above)
 **Platform**: Cross-platform (Windows, macOS, Linux)
+**Last Updated**: June 12, 2026
+
+### Development Status
+- **Phase 0** (In Progress): Critical safety fixes
+- **Phase 1** (Planned): Storage layer rewrite
+- **Phase 2** (Planned): V2 model integration
+- **Phase 3** (Planned): Template UI integration
+- **Phase 4** (Planned): Comprehensive testing
+- **Phase 5** (Planned): Production polish
+
+**Estimated Production Ready**: 3-4 weeks from June 12, 2026

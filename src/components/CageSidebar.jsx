@@ -16,9 +16,13 @@ export default function CageSidebar({
   onSelectCage,
   onAddCage,
   onDeleteCage,
+  experimentConfig,
 }) {
   const [name, setName] = React.useState("");
-  const [cohortId, setCohortId] = React.useState(COHORTS[0].id);
+  
+  // Use experiment config cohorts if available, otherwise fall back to COHORTS
+  const availableCohorts = experimentConfig?.config?.cohorts || COHORTS;
+  const [cohortId, setCohortId] = React.useState(availableCohorts[0]?.id || COHORTS[0].id);
 
   const handleAdd = () => {
     const cageName = name.trim() || `Cage ${cages.length + 1}`;
@@ -51,8 +55,9 @@ export default function CageSidebar({
             label="Cohort"
             value={cohortId}
             onChange={(e) => setCohortId(e.target.value)}
+            helperText={experimentConfig ? "From experiment setup" : "Using defaults"}
           >
-            {COHORTS.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            {availableCohorts.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
           </TextField>
           <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
             Add Cage
@@ -64,7 +69,8 @@ export default function CageSidebar({
         <Box sx={{ flex: 1, overflow: "auto" }}>
           <List dense>
             {cages.map(c => {
-              const cohort = getCohort(c.cohortId);
+              // Try to find cohort in experiment config first, then fall back to COHORTS
+              const cohort = availableCohorts.find(co => co.id === c.cohortId) || getCohort(c.cohortId);
               return (
                 <ListItem
                   key={c.id}
