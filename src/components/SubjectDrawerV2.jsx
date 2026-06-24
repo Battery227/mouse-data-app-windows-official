@@ -189,7 +189,7 @@ export default function SubjectDrawerV2({
           <Tab label={`Timeline (${subjectTimeline.length})`} />
         </Tabs>
 
-        <Box sx={{ flex: 1, overflow: "auto", mt: 2 }}>
+        <Box sx={{ flex: 1, overflow: "auto", mt: 2, pt: 1 }}>
           {tab === 0 && (
             <Stack spacing={2}>
               <TextField
