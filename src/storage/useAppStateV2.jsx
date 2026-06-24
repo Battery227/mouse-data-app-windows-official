@@ -300,6 +300,81 @@ export function useAppStateV2() {
       }));
     };
 
+    // Group timeline (scheduled events) editing — drives the per-subject Timeline + check-off
+    const addGroupTimelineEvent = (cohortId, groupId, event) => {
+      const id = uid('tl');
+      const newEvent = {
+        id,
+        day: Number(event.day) || 0,
+        category: event.category || 'test',
+        name: event.name || '',
+        description: event.description || ''
+      };
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: (c.groups || []).map(g =>
+                g.id === groupId ? { ...g, timeline: [...(g.timeline || []), newEvent] } : g) }
+            : c
+        )
+      }));
+      return id;
+    };
+
+    const updateGroupTimelineEvent = (cohortId, groupId, eventId, patch) => {
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: (c.groups || []).map(g =>
+                g.id === groupId
+                  ? { ...g, timeline: (g.timeline || []).map(t =>
+                      t.id === eventId
+                        ? { ...t, ...patch, day: patch.day !== undefined ? Number(patch.day) : t.day }
+                        : t) }
+                  : g) }
+            : c
+        )
+      }));
+    };
+
+    const deleteGroupTimelineEvent = (cohortId, groupId, eventId) => {
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: (c.groups || []).map(g =>
+                g.id === groupId ? { ...g, timeline: (g.timeline || []).filter(t => t.id !== eventId) } : g) }
+            : c
+        )
+      }));
+    };
+
+    // Expand a day-range into repeated scheduled events in one action.
+    const addRecurringGroupTimelineEvents = (cohortId, groupId, opts) => {
+      const { name, category = 'test', description = '', startDay = 0, endDay = 0, everyNDays = 1 } = opts || {};
+      const step = Math.max(1, Number(everyNDays) || 1);
+      const from = Number(startDay) || 0;
+      const to = Number(endDay);
+      const last = Number.isFinite(to) ? to : from;
+      const newEvents = [];
+      for (let d = from; d <= last; d += step) {
+        newEvents.push({ id: uid('tl'), day: d, category, name, description });
+      }
+      if (newEvents.length === 0) return 0;
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: (c.groups || []).map(g =>
+                g.id === groupId ? { ...g, timeline: [...(g.timeline || []), ...newEvents] } : g) }
+            : c
+        )
+      }));
+      return newEvents.length;
+    };
+
     // Housing unit operations
     const addHousingUnit = (name, experimentId) => {
       const unitId = uid("housing");
@@ -507,6 +582,10 @@ export function useAppStateV2() {
       updateGroup,
       deleteGroup,
       assignHousingUnitCohort,
+      addGroupTimelineEvent,
+      updateGroupTimelineEvent,
+      deleteGroupTimelineEvent,
+      addRecurringGroupTimelineEvents,
       addSubject,
       updateSubject,
       updateSubjectFields,

@@ -12,6 +12,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import { SUBJECT_STATUS } from "../models/constants";
 import DynamicField from "./DynamicField";
 import EventDialogV2 from "./EventDialogV2";
+import GroupScheduleDialog from "./GroupScheduleDialog";
 
 function fmt(iso) {
   try {
@@ -51,6 +52,7 @@ export default function SubjectDrawerV2({
 }) {
   const [tab, setTab] = React.useState(0);
   const [eventDialogOpen, setEventDialogOpen] = React.useState(false);
+  const [scheduleDialogOpen, setScheduleDialogOpen] = React.useState(false);
   const [fieldValues, setFieldValues] = React.useState(subject?.customFieldValues || {});
   const subjectIdRef = React.useRef(subject?.id);
 
@@ -68,6 +70,12 @@ export default function SubjectDrawerV2({
       .filter(e => e.subjectId === subject?.id)
       .sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
   }, [events, subject?.id]);
+
+  const subjectGroup = React.useMemo(() => {
+    if (!subject?.cohortId || !subject?.groupId || !experiment?.config?.cohorts) return null;
+    const cohort = experiment.config.cohorts.find(c => c.id === subject.cohortId);
+    return cohort?.groups?.find(g => g.id === subject.groupId) || null;
+  }, [subject?.cohortId, subject?.groupId, experiment]);
 
   // Calculate timeline based on subject's group
   const subjectTimeline = React.useMemo(() => {
@@ -307,6 +315,18 @@ export default function SubjectDrawerV2({
                 Add Event
               </Button>
 
+              {subject.cohortId && subject.groupId && (
+                <Button
+                  variant="outlined"
+                  startIcon={<ScheduleIcon />}
+                  onClick={() => setScheduleDialogOpen(true)}
+                  fullWidth
+                  sx={{ mb: 2 }}
+                >
+                  Edit group schedule
+                </Button>
+              )}
+
               {subject.cohortId && subject.groupId && !subject.startDate && (
                 <Alert severity="info" sx={{ mb: 2 }}>
                   Set a start date in the Details tab to activate this group's scheduled timeline.
@@ -440,6 +460,18 @@ export default function SubjectDrawerV2({
           template={template}
           experiment={experiment}
         />
+
+        {subjectGroup && (
+          <GroupScheduleDialog
+            open={scheduleDialogOpen}
+            onClose={() => setScheduleDialogOpen(false)}
+            groupName={subjectGroup.name}
+            timeline={subjectGroup.timeline || []}
+            onAdd={(ev) => api.addGroupTimelineEvent(subject.cohortId, subject.groupId, ev)}
+            onDelete={(id) => api.deleteGroupTimelineEvent(subject.cohortId, subject.groupId, id)}
+            onAddRecurring={(opts) => api.addRecurringGroupTimelineEvents(subject.cohortId, subject.groupId, opts)}
+          />
+        )}
       </Box>
     </Drawer>
   );
