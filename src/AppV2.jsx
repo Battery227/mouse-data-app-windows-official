@@ -359,6 +359,7 @@ export default function AppV2() {
           housingUnits={housingUnits}
           experiment={activeExperiment}
           onToggleComplete={api.setTimelineCompletion}
+          onSetNote={api.setTimelineNote}
         />
 
         <ExperimentSwitcher

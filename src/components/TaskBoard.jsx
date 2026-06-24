@@ -11,13 +11,14 @@ import {
   Box, Chip, Checkbox, List, ListItem
 } from "@mui/material";
 import { computeSubjectTimeline, EVENT_COLORS } from "../core/schedule";
+import TimelineNoteField from "./TimelineNoteField";
 
 function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
 function fmtDate(d) {
   return new Date(d).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export default function TaskBoard({ open, onClose, subjects = [], housingUnits = [], experiment, onToggleComplete }) {
+export default function TaskBoard({ open, onClose, subjects = [], housingUnits = [], experiment, onToggleComplete, onSetNote }) {
   const cageById = React.useMemo(() => {
     const m = {};
     housingUnits.forEach(h => { m[h.id] = h; });
@@ -72,6 +73,9 @@ export default function TaskBoard({ open, onClose, subjects = [], housingUnits =
           <Typography variant="caption" color="text.secondary">
             {subject.subjectId}{cage ? ` · ${cage.name}` : ''} · Day {item.day} · {fmtDate(item.scheduledDate)}
           </Typography>
+          <Box sx={{ mt: 0.5 }}>
+            <TimelineNoteField value={item.note} onSave={(note) => onSetNote(subject.id, item.id, note)} />
+          </Box>
         </Box>
       </ListItem>
     );

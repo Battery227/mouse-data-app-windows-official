@@ -502,6 +502,20 @@ export function useAppStateV2() {
       }));
     };
 
+    // Note / measurement attached to a scheduled timeline item (weight, trial times, etc.)
+    const setTimelineNote = (subjectId, itemId, note) => {
+      updateState(prev => ({
+        ...prev,
+        subjects: prev.subjects.map(s => {
+          if (s.id !== subjectId) return s;
+          const notes = { ...(s.timelineNotes || {}) };
+          if (note && note.trim()) notes[itemId] = note;
+          else delete notes[itemId];
+          return { ...s, timelineNotes: notes, updatedAt: nowIso() };
+        })
+      }));
+    };
+
     const deleteSubject = (subjectId) => {
       updateState(prev => ({
         ...prev,
@@ -591,6 +605,7 @@ export function useAppStateV2() {
       updateSubjectFields,
       deleteSubject,
       setTimelineCompletion,
+      setTimelineNote,
       addEvent,
       updateEvent,
       deleteEvent,

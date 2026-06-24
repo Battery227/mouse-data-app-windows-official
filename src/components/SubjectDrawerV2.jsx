@@ -14,6 +14,7 @@ import DynamicField from "./DynamicField";
 import EventDialogV2 from "./EventDialogV2";
 import GroupScheduleDialog from "./GroupScheduleDialog";
 import { computeSubjectTimeline } from "../core/schedule";
+import TimelineNoteField from "./TimelineNoteField";
 
 function fmt(iso) {
   try {
@@ -359,6 +360,12 @@ export default function SubjectDrawerV2({
                                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                                   Scheduled: {event.scheduledDate.toLocaleDateString()}
                                 </Typography>
+                                <Box sx={{ mt: 0.5 }}>
+                                  <TimelineNoteField
+                                    value={event.note}
+                                    onSave={(note) => api.setTimelineNote(subject.id, event.id, note)}
+                                  />
+                                </Box>
                               </Box>
                             </Stack>
                           </CardContent>

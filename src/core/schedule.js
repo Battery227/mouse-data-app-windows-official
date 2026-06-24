@@ -41,7 +41,8 @@ export function computeSubjectTimeline(subject, experiment) {
                    daysSinceStart >= event.day ? 'overdue' :
                    daysSinceStart === event.day - 1 ? 'due-soon' : 'upcoming';
 
-    return { ...event, scheduledDate, status, daysSinceStart, completed };
+    const note = subject.timelineNotes?.[event.id] || '';
+    return { ...event, scheduledDate, status, daysSinceStart, completed, note };
   }).sort((a, b) => a.day - b.day);
 }
 
