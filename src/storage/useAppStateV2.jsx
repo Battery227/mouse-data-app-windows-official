@@ -413,6 +413,20 @@ export function useAppStateV2() {
       }));
     };
 
+    // Explicit check-off of a scheduled timeline item, per subject.
+    const setTimelineCompletion = (subjectId, itemId, done) => {
+      updateState(prev => ({
+        ...prev,
+        subjects: prev.subjects.map(s => {
+          if (s.id !== subjectId) return s;
+          const completions = { ...(s.timelineCompletions || {}) };
+          if (done) completions[itemId] = nowIso();
+          else delete completions[itemId];
+          return { ...s, timelineCompletions: completions, updatedAt: nowIso() };
+        })
+      }));
+    };
+
     const deleteSubject = (subjectId) => {
       updateState(prev => ({
         ...prev,
@@ -497,6 +511,7 @@ export function useAppStateV2() {
       updateSubject,
       updateSubjectFields,
       deleteSubject,
+      setTimelineCompletion,
       addEvent,
       updateEvent,
       deleteEvent,
