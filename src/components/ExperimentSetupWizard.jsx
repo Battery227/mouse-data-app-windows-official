@@ -85,15 +85,10 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
   const [editingField, setEditingField] = useState(null);
   const [fieldDialogOpen, setFieldDialogOpen] = useState(false);
   
-  // Step 4: Event Types
-  const [eventTypes, setEventTypes] = useState(editingExperiment?.config?.eventTypes || []);
-  const [editingEvent, setEditingEvent] = useState(null);
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  
   // Timeline event being edited
   const [editingTimelineEvent, setEditingTimelineEvent] = useState(null);
 
-  const steps = ['Basic Info', 'Cohorts & Groups', 'Subject Fields', 'Event Types'];
+  const steps = ['Basic Info', 'Cohorts & Groups', 'Subject Fields'];
 
   const isStepValid = () => {
     switch (activeStep) {
@@ -150,8 +145,7 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
       config: {
         speciesName,
         cohorts,
-        subjectFields,
-        eventTypes
+        subjectFields
       },
       createdAt: editingExperiment?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -193,36 +187,6 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
       return;
     }
     setSubjectFields(subjectFields.filter(f => f.id !== fieldId));
-  };
-
-  // Event type management
-  const handleAddEventType = () => {
-    setEditingEvent({ id: `event_${Date.now()}`, category: 'test', name: '', description: '' });
-    setEventDialogOpen(true);
-  };
-
-  const handleEditEventType = (event) => {
-    setEditingEvent({ ...event });
-    setEventDialogOpen(true);
-  };
-
-  const handleSaveEventType = () => {
-    if (!editingEvent.name) {
-      alert('Event name is required');
-      return;
-    }
-
-    if (eventTypes.find(e => e.id === editingEvent.id)) {
-      setEventTypes(eventTypes.map(e => e.id === editingEvent.id ? editingEvent : e));
-    } else {
-      setEventTypes([...eventTypes, editingEvent]);
-    }
-    setEventDialogOpen(false);
-    setEditingEvent(null);
-  };
-
-  const handleDeleteEventType = (eventId) => {
-    setEventTypes(eventTypes.filter(e => e.id !== eventId));
   };
 
   // Timeline management (per group)
@@ -515,52 +479,6 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
             </Stack>
           )}
 
-          {/* Step 3: Event Types */}
-          {activeStep === 3 && (
-            <Stack spacing={2}>
-              <Alert severity="info">
-                Define what types of events you'll track (optional). You can always add events later.
-              </Alert>
-
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddEventType}
-                fullWidth
-              >
-                Add Event Type
-              </Button>
-
-              <List>
-                {eventTypes.map((event) => (
-                  <ListItem
-                    key={event.id}
-                    sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}
-                  >
-                    <ListItemText
-                      primary={event.name}
-                      secondary={`Category: ${event.category}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton onClick={() => handleEditEventType(event)} size="small">
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton onClick={() => handleDeleteEventType(event.id)} size="small">
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-
-              {eventTypes.length === 0 && (
-                <Typography color="text.secondary" align="center">
-                  No event types defined. You can add them later if needed.
-                </Typography>
-              )}
-            </Stack>
-          )}
-
         </DialogContent>
 
         <DialogActions>
@@ -614,6 +532,11 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
                   <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
                 ))}
               </Select>
+              <FormHelperText>
+                Number for measurements like weight or length. Date for a calendar date.
+                Dropdown for fixed choices. Text / Long Text for free text. (To track a
+                measurement over time, schedule a task and record the value in its note.)
+              </FormHelperText>
             </FormControl>
 
             <TextField
@@ -628,49 +551,6 @@ export default function ExperimentSetupWizard({ open, onClose, onSave, editingEx
         <DialogActions>
           <Button onClick={() => setFieldDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleSaveField} variant="contained">Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Event Type Edit Dialog */}
-      <Dialog open={eventDialogOpen} onClose={() => setEventDialogOpen(false)}>
-        <DialogTitle>{editingEvent?.id && eventTypes.find(e => e.id === editingEvent.id) ? 'Edit' : 'Add'} Event Type</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1, minWidth: 400 }}>
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={editingEvent?.category || 'test'}
-                onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value })}
-                label="Category"
-              >
-                {EVENT_CATEGORIES.map(cat => (
-                  <MenuItem key={cat.value} value={cat.value}>{cat.label}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              label="Event Name"
-              value={editingEvent?.name || ''}
-              onChange={(e) => setEditingEvent({ ...editingEvent, name: e.target.value })}
-              required
-              fullWidth
-              placeholder="e.g., RotaRod Test, Drug A Injection"
-            />
-
-            <TextField
-              label="Description"
-              value={editingEvent?.description || ''}
-              onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-              multiline
-              rows={2}
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEventDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEventType} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
 
