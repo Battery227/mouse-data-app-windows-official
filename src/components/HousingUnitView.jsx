@@ -150,11 +150,13 @@ export default function HousingUnitView({
               sx={{
                 cursor: subject ? 'pointer' : 'default',
                 opacity: subject ? 1 : 0.5,
-                border: subject ? '2px solid' : '1px dashed',
-                borderColor: subject ? 'primary.main' : 'divider',
+                border: subject ? '1px solid' : '1px dashed',
+                borderColor: 'divider',
+                borderLeft: subject
+                  ? `6px solid ${cohortById[subject.cohortId]?.color || '#bdbdbd'}`
+                  : undefined,
                 '&:hover': subject ? {
-                  boxShadow: 3,
-                  borderColor: 'primary.dark'
+                  boxShadow: 3
                 } : {}
               }}
               onClick={() => subject && onSelectSubject(subject)}
