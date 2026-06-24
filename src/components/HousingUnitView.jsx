@@ -32,14 +32,19 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SUBJECT_STATUS } from "../models/constants";
+import CohortAssignDialog from "./CohortAssignDialog";
 
-export default function HousingUnitView({ 
-  housingUnit, 
-  subjects, 
+export default function HousingUnitView({
+  housingUnit,
+  subjects,
   template,
-  onSelectSubject, 
+  cohorts = [],
+  onSelectSubject,
   onAddSubject,
-  onDeleteSubject 
+  onDeleteSubject,
+  onAssignCohort,
+  onAddCohort,
+  onAddGroup
 }) {
   if (!housingUnit) {
     return (
@@ -67,6 +72,15 @@ export default function HousingUnitView({
     (template?.species?.defaultFields || []).forEach((f) => { map[f.id] = f.label; });
     return map;
   }, [template]);
+
+  const cohortById = React.useMemo(() => {
+    const m = {};
+    (cohorts || []).forEach((c) => { m[c.id] = c; });
+    return m;
+  }, [cohorts]);
+  const cageCohort = cohortById[housingUnit.cohortId];
+  const cageGroup = cageCohort?.groups?.find((g) => g.id === housingUnit.groupId);
+  const [cohortDialogOpen, setCohortDialogOpen] = React.useState(false);
 
   const handleAddSubject = () => {
     if (atCapacity) return;
@@ -101,6 +115,19 @@ export default function HousingUnitView({
             {currentCount} / {capacity} subjects
             {template && ` • ${template.species?.name || 'Generic'} Template`}
           </Typography>
+          <Chip
+            size="small"
+            clickable
+            onClick={() => setCohortDialogOpen(true)}
+            variant={cageCohort ? 'filled' : 'outlined'}
+            sx={{ mt: 1 }}
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: cageCohort?.color || 'grey.400' }} />
+                {cageCohort ? `${cageCohort.name}${cageGroup ? ' / ' + cageGroup.name : ''}` : 'Assign cohort / group'}
+              </Box>
+            }
+          />
         </Box>
         <Tooltip title={atCapacity ? "Housing unit at capacity" : "Add new subject"}>
           <span>
@@ -194,6 +221,18 @@ export default function HousingUnitView({
           </Typography>
         </Box>
       )}
+
+      <CohortAssignDialog
+        open={cohortDialogOpen}
+        onClose={() => setCohortDialogOpen(false)}
+        unitName={housingUnit.name}
+        cohorts={cohorts}
+        currentCohortId={housingUnit.cohortId || ''}
+        currentGroupId={housingUnit.groupId || ''}
+        onAssign={(cohortId, groupId) => onAssignCohort(housingUnit.id, cohortId, groupId)}
+        onAddCohort={onAddCohort}
+        onAddGroup={onAddGroup}
+      />
     </Box>
   );
 }

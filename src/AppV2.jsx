@@ -294,6 +294,7 @@ export default function AppV2() {
               housingUnit={selectedHousing}
               subjects={subjects.filter(s => s.housingUnitId === selectedHousing.id)}
               template={activeTemplate}
+              cohorts={activeExperiment?.config?.cohorts || []}
               onSelectSubject={(s) => setSelectedSubject(s)}
               onAddSubject={(housingUnitId, slot) => {
                 const newId = api.addSubject(housingUnitId, `Subject-${slot}`);
@@ -303,6 +304,9 @@ export default function AppV2() {
                 // HousingUnitView already confirms before calling this.
                 api.deleteSubject(subjectId);
               }}
+              onAssignCohort={api.assignHousingUnitCohort}
+              onAddCohort={api.addCohort}
+              onAddGroup={api.addGroup}
             />
           ) : (
             <Box sx={{ p: 3 }}>

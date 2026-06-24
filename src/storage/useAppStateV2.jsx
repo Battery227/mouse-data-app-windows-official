@@ -194,6 +194,112 @@ export function useAppStateV2() {
       }));
     };
 
+    // Cohort / group operations (stored in experiment.config.cohorts)
+    const COHORT_COLORS = ['#1976d2', '#9c27b0', '#2e7d32', '#ed6c02', '#d32f2f', '#0288d1', '#7b1fa2', '#5d4037'];
+
+    const updateActiveConfig = (configUpdater) => {
+      updateState(prev => ({
+        ...prev,
+        experiments: prev.experiments.map(e =>
+          e.id === activeExperimentId
+            ? { ...e, config: configUpdater(e.config || {}), updatedAt: nowIso() }
+            : e
+        )
+      }));
+    };
+
+    const addCohort = (name) => {
+      const cohortId = uid('cohort');
+      updateActiveConfig(config => {
+        const cohorts = config.cohorts || [];
+        const color = COHORT_COLORS[cohorts.length % COHORT_COLORS.length];
+        return { ...config, cohorts: [...cohorts, { id: cohortId, name, color, description: '', groups: [] }] };
+      });
+      return cohortId;
+    };
+
+    const updateCohort = (cohortId, patch) => {
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c => c.id === cohortId ? { ...c, ...patch } : c)
+      }));
+    };
+
+    const deleteCohort = (cohortId) => {
+      updateState(prev => ({
+        ...prev,
+        experiments: prev.experiments.map(e =>
+          e.id === activeExperimentId
+            ? { ...e, config: { ...(e.config || {}), cohorts: ((e.config || {}).cohorts || []).filter(c => c.id !== cohortId) }, updatedAt: nowIso() }
+            : e
+        ),
+        housingUnits: prev.housingUnits.map(h => h.cohortId === cohortId ? { ...h, cohortId: '', groupId: '' } : h),
+        subjects: prev.subjects.map(s => s.cohortId === cohortId ? { ...s, cohortId: '', groupId: '' } : s)
+      }));
+    };
+
+    const addGroup = (cohortId, name) => {
+      const groupId = uid('group');
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: [...(c.groups || []), { id: groupId, name, description: '', timeline: [] }] }
+            : c
+        )
+      }));
+      return groupId;
+    };
+
+    const updateGroup = (cohortId, groupId, patch) => {
+      updateActiveConfig(config => ({
+        ...config,
+        cohorts: (config.cohorts || []).map(c =>
+          c.id === cohortId
+            ? { ...c, groups: (c.groups || []).map(g => g.id === groupId ? { ...g, ...patch } : g) }
+            : c
+        )
+      }));
+    };
+
+    const deleteGroup = (cohortId, groupId) => {
+      updateState(prev => ({
+        ...prev,
+        experiments: prev.experiments.map(e =>
+          e.id === activeExperimentId
+            ? {
+                ...e,
+                config: {
+                  ...(e.config || {}),
+                  cohorts: ((e.config || {}).cohorts || []).map(c =>
+                    c.id === cohortId ? { ...c, groups: (c.groups || []).filter(g => g.id !== groupId) } : c
+                  )
+                },
+                updatedAt: nowIso()
+              }
+            : e
+        ),
+        housingUnits: prev.housingUnits.map(h => h.groupId === groupId ? { ...h, groupId: '' } : h),
+        subjects: prev.subjects.map(s => s.groupId === groupId ? { ...s, groupId: '' } : s)
+      }));
+    };
+
+    // Assign a whole housing unit (and all its current subjects) to a cohort/group.
+    // Per-subject overrides afterward are still allowed via updateSubject.
+    const assignHousingUnitCohort = (unitId, cohortId, groupId) => {
+      updateState(prev => ({
+        ...prev,
+        housingUnits: prev.housingUnits.map(h =>
+          h.id === unitId ? { ...h, cohortId: cohortId || '', groupId: groupId || '', updatedAt: nowIso() } : h
+        ),
+        subjects: prev.subjects.map(s =>
+          s.housingUnitId === unitId
+            ? { ...s, cohortId: cohortId || '', groupId: groupId || '', updatedAt: nowIso() }
+            : s
+        )
+      }));
+    };
+
     // Housing unit operations
     const addHousingUnit = (name, experimentId) => {
       const unitId = uid("housing");
@@ -274,7 +380,8 @@ export function useAppStateV2() {
             statusDate: nowIso(),
             startDate: nowIso(), // When this subject started in the experiment
             customFieldValues: {},
-            groupId: '',
+            cohortId: housingUnit?.cohortId || '', // inherit the cage's cohort/group
+            groupId: housingUnit?.groupId || '',
             createdAt: nowIso(),
             updatedAt: nowIso(),
             notes: ''
@@ -379,6 +486,13 @@ export function useAppStateV2() {
       addHousingUnit,
       updateHousingUnit,
       deleteHousingUnit,
+      addCohort,
+      updateCohort,
+      deleteCohort,
+      addGroup,
+      updateGroup,
+      deleteGroup,
+      assignHousingUnitCohort,
       addSubject,
       updateSubject,
       updateSubjectFields,
