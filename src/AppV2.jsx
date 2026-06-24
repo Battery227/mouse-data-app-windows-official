@@ -299,6 +299,7 @@ export default function AppV2() {
               onAssignCohort={api.assignHousingUnitCohort}
               onAddCohort={api.addCohort}
               onAddGroup={api.addGroup}
+              onLogEvent={api.addEvent}
             />
           ) : (
             <Box sx={{ p: 3 }}>

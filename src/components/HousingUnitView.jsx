@@ -33,6 +33,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { SUBJECT_STATUS } from "../models/constants";
 import CohortAssignDialog from "./CohortAssignDialog";
+import BulkEventDialog from "./BulkEventDialog";
 
 export default function HousingUnitView({
   housingUnit,
@@ -44,7 +45,8 @@ export default function HousingUnitView({
   onDeleteSubject,
   onAssignCohort,
   onAddCohort,
-  onAddGroup
+  onAddGroup,
+  onLogEvent
 }) {
   if (!housingUnit) {
     return (
@@ -81,6 +83,7 @@ export default function HousingUnitView({
   const cageCohort = cohortById[housingUnit.cohortId];
   const cageGroup = cageCohort?.groups?.find((g) => g.id === housingUnit.groupId);
   const [cohortDialogOpen, setCohortDialogOpen] = React.useState(false);
+  const [bulkOpen, setBulkOpen] = React.useState(false);
 
   const handleAddSubject = () => {
     if (atCapacity) return;
@@ -129,18 +132,27 @@ export default function HousingUnitView({
             }
           />
         </Box>
-        <Tooltip title={atCapacity ? "Housing unit at capacity" : "Add new subject"}>
-          <span>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddSubject}
-              disabled={atCapacity}
-            >
-              Add Subject
-            </Button>
-          </span>
-        </Tooltip>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            onClick={() => setBulkOpen(true)}
+            disabled={subjects.length === 0}
+          >
+            Log for all
+          </Button>
+          <Tooltip title={atCapacity ? "Housing unit at capacity" : "Add new subject"}>
+            <span>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddSubject}
+                disabled={atCapacity}
+              >
+                Add Subject
+              </Button>
+            </span>
+          </Tooltip>
+        </Stack>
       </Stack>
 
       <Grid container spacing={2}>
@@ -234,6 +246,22 @@ export default function HousingUnitView({
         onAssign={(cohortId, groupId) => onAssignCohort(housingUnit.id, cohortId, groupId)}
         onAddCohort={onAddCohort}
         onAddGroup={onAddGroup}
+      />
+
+      <BulkEventDialog
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        count={subjects.length}
+        targetLabel={housingUnit.name}
+        onSubmit={(ev) => {
+          subjects.forEach((s) => onLogEvent({
+            subjectId: s.id,
+            eventTypeId: `${ev.category}-${ev.name}`,
+            datetime: ev.datetime,
+            fieldValues: { category: ev.category, type: ev.name },
+            notes: ev.notes
+          }));
+        }}
       />
     </Box>
   );
