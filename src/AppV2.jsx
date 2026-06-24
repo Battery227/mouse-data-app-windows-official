@@ -13,6 +13,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import RedoIcon from "@mui/icons-material/Redo";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ChecklistIcon from "@mui/icons-material/Checklist";
+import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import { theme } from "./theme";
 import { useAppStateV2 } from "./storage/useAppStateV2";
 import { getEnvironmentName } from "./storage/environment";
@@ -24,6 +25,7 @@ import EnhancedExport from "./components/EnhancedExport";
 import TemplateSelector from "./components/TemplateSelector";
 import ScheduleTimeline from "./components/ScheduleTimeline";
 import TaskBoard from "./components/TaskBoard";
+import BackupDialog from "./components/BackupDialog";
 import TemplateBuilderDialog from "./components/TemplateBuilder";
 import { BUILT_IN_TEMPLATES } from "./core/schema/builtInTemplates";
 
@@ -51,6 +53,7 @@ export default function AppV2() {
   const [templateBuilderOpen, setTemplateBuilderOpen] = React.useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = React.useState(false);
   const [taskBoardOpen, setTaskBoardOpen] = React.useState(false);
+  const [backupOpen, setBackupOpen] = React.useState(false);
   const [storageEnv] = React.useState(() => getEnvironmentName());
   const [expMenuAnchor, setExpMenuAnchor] = React.useState(null);
 
@@ -229,30 +232,10 @@ export default function AppV2() {
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<UploadIcon />}
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = '.json';
-                  input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        try {
-                          const data = JSON.parse(event.target.result);
-                          api.importJson(data);
-                        } catch (err) {
-                          alert('Failed to import: ' + err.message);
-                        }
-                      };
-                      reader.readAsText(file);
-                    }
-                  };
-                  input.click();
-                }}
+                startIcon={<SettingsBackupRestoreIcon />}
+                onClick={() => setBackupOpen(true)}
               >
-                Import
+                Backup
               </Button>
             </Stack>
           </Toolbar>
@@ -360,6 +343,13 @@ export default function AppV2() {
           experiment={activeExperiment}
           onToggleComplete={api.setTimelineCompletion}
           onSetNote={api.setTimelineNote}
+        />
+
+        <BackupDialog
+          open={backupOpen}
+          onClose={() => setBackupOpen(false)}
+          state={state}
+          onRestore={api.importJson}
         />
 
         <ExperimentSwitcher

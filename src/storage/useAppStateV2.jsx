@@ -17,6 +17,7 @@ import { idbGet, idbSet, getStorageInfo } from "./idb";
 import { uid } from "../utils/ids";
 import { BUILT_IN_TEMPLATES } from "../core/schema/builtInTemplates";
 import { migrateV1ToV2, needsMigration, validateMigratedState, createMigrationBackup } from "./migration";
+import { pushSnapshot } from "./backup";
 import { SUBJECT_STATUS } from "../models/constants";
 
 const STORAGE_KEY = "stateV2";
@@ -73,6 +74,7 @@ export function useAppStateV2() {
   const [redoStack, setRedoStack] = useState([]);
   const saveTimer = useRef(null);
   const isUndoRedoAction = useRef(false);
+  const lastSnapshotRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
@@ -649,6 +651,11 @@ export function useAppStateV2() {
         if (saveSuccess) {
           setState(toSave);
           setSaveStatus("saved");
+          // Periodic automatic restore point (~every 10 min of activity)
+          if (Date.now() - lastSnapshotRef.current > 10 * 60 * 1000) {
+            lastSnapshotRef.current = Date.now();
+            pushSnapshot(toSave);
+          }
         } else {
           console.error("Storage write failed");
           setSaveStatus("error");
