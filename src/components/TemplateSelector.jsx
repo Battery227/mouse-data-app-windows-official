@@ -62,7 +62,7 @@ function TemplateCard({ template, onSelect, selected }) {
           {template.description}
         </Typography>
 
-        <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 1 }}>
+        <Stack direction="row" spacing={0.5} sx={{ mb: 1, flexWrap: "wrap" }}>
           {template.species && (
             <Chip 
               label={template.species.pluralName} 

@@ -12,6 +12,7 @@ import ScienceIcon from "@mui/icons-material/Science";
 import UndoIcon from "@mui/icons-material/Undo";
 import RedoIcon from "@mui/icons-material/Redo";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import { theme } from "./theme";
 import { useAppStateV2 } from "./storage/useAppStateV2";
 import { getEnvironmentName } from "./storage/environment";
@@ -22,6 +23,7 @@ import ExperimentSwitcher from "./components/ExperimentSwitcher";
 import EnhancedExport from "./components/EnhancedExport";
 import TemplateSelector from "./components/TemplateSelector";
 import ScheduleTimeline from "./components/ScheduleTimeline";
+import TaskBoard from "./components/TaskBoard";
 import TemplateBuilderDialog from "./components/TemplateBuilder";
 import { BUILT_IN_TEMPLATES } from "./core/schema/builtInTemplates";
 
@@ -48,6 +50,7 @@ export default function AppV2() {
   const [templateSelectorOpen, setTemplateSelectorOpen] = React.useState(false);
   const [templateBuilderOpen, setTemplateBuilderOpen] = React.useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = React.useState(false);
+  const [taskBoardOpen, setTaskBoardOpen] = React.useState(false);
   const [storageEnv] = React.useState(() => getEnvironmentName());
   const [expMenuAnchor, setExpMenuAnchor] = React.useState(null);
 
@@ -194,6 +197,12 @@ export default function AppV2() {
                 </span>
               </Tooltip>
               
+              <Tooltip title="Tasks — due today / this week">
+                <IconButton color="inherit" onClick={() => setTaskBoardOpen(true)} size="small">
+                  <ChecklistIcon />
+                </IconButton>
+              </Tooltip>
+
               <Tooltip title="Schedule">
                 <IconButton color="inherit" onClick={() => setScheduleDialogOpen(true)} size="small">
                   <CalendarMonthIcon />
@@ -341,6 +350,15 @@ export default function AppV2() {
           state={state}
           experiments={state.experiments}
           templates={state.templates}
+        />
+
+        <TaskBoard
+          open={taskBoardOpen}
+          onClose={() => setTaskBoardOpen(false)}
+          subjects={subjects}
+          housingUnits={housingUnits}
+          experiment={activeExperiment}
+          onToggleComplete={api.setTimelineCompletion}
         />
 
         <ExperimentSwitcher

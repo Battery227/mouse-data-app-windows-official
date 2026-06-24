@@ -13,6 +13,7 @@ import { SUBJECT_STATUS } from "../models/constants";
 import DynamicField from "./DynamicField";
 import EventDialogV2 from "./EventDialogV2";
 import GroupScheduleDialog from "./GroupScheduleDialog";
+import { computeSubjectTimeline } from "../core/schedule";
 
 function fmt(iso) {
   try {
@@ -77,44 +78,11 @@ export default function SubjectDrawerV2({
     return cohort?.groups?.find(g => g.id === subject.groupId) || null;
   }, [subject?.cohortId, subject?.groupId, experiment]);
 
-  // Calculate timeline based on subject's group
-  const subjectTimeline = React.useMemo(() => {
-    if (!subject?.cohortId || !subject?.groupId || !experiment?.config?.cohorts) {
-      return [];
-    }
-
-    const cohort = experiment.config.cohorts.find(c => c.id === subject.cohortId);
-    if (!cohort) return [];
-
-    const group = cohort.groups.find(g => g.id === subject.groupId);
-    if (!group || !group.timeline) return [];
-
-    const startDate = subject.startDate ? new Date(subject.startDate) : new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return group.timeline.map(event => {
-      const scheduledDate = new Date(startDate);
-      scheduledDate.setDate(scheduledDate.getDate() + event.day);
-      scheduledDate.setHours(0, 0, 0, 0);
-
-      // Completed when explicitly checked off for this subject
-      const completed = Boolean(subject.timelineCompletions?.[event.id]);
-
-      const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-      const status = completed ? 'completed' :
-                     daysSinceStart >= event.day ? 'overdue' :
-                     daysSinceStart === event.day - 1 ? 'due-soon' : 'upcoming';
-
-      return {
-        ...event,
-        scheduledDate,
-        status,
-        daysSinceStart,
-        completed
-      };
-    }).sort((a, b) => a.day - b.day);
-  }, [subject, experiment, subjectEvents]);
+  // Calculate timeline based on subject's group (shared helper, also used by TaskBoard)
+  const subjectTimeline = React.useMemo(
+    () => computeSubjectTimeline(subject, experiment),
+    [subject, experiment]
+  );
 
   const handleFieldChange = (fieldId, value) => {
     // Update local state immediately for responsive UI

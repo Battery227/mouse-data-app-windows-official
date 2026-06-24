@@ -218,7 +218,7 @@ export default function EnhancedExport({
                 </Alert>
               )}
 
-              <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                 {experiments.map(exp => (
                   <Chip
                     key={exp.id}

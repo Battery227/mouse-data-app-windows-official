@@ -441,7 +441,7 @@ export default function TemplateBuilderDialog({ open, onClose, onSave }) {
 
             <Box>
               <Typography variant="subtitle2">Subject Fields: {subjectFields.length}</Typography>
-              <Stack direction="row" spacing={0.5} flexWrap="wrap">
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
                 {subjectFields.map(f => (
                   <Chip key={f.id} label={f.label || f.name} size="small" />
                 ))}
@@ -450,7 +450,7 @@ export default function TemplateBuilderDialog({ open, onClose, onSave }) {
 
             <Box>
               <Typography variant="subtitle2">Event Types: {eventTypes.length}</Typography>
-              <Stack direction="row" spacing={0.5} flexWrap="wrap">
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
                 {eventTypes.map(e => (
                   <Chip key={e.id} label={e.name} size="small" color="primary" />
                 ))}
