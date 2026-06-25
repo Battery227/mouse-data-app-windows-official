@@ -2,7 +2,7 @@ import React from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import {
   Box, CssBaseline, AppBar, Toolbar, Typography, IconButton, Chip, Stack,
-  Tooltip, Button, Alert, AlertTitle, Menu, MenuItem, Dialog, DialogContent, DialogTitle
+  Tooltip, Button, Alert, AlertTitle, Menu, MenuItem
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -11,7 +11,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ScienceIcon from "@mui/icons-material/Science";
 import UndoIcon from "@mui/icons-material/Undo";
 import RedoIcon from "@mui/icons-material/Redo";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,7 +23,6 @@ import SubjectDrawerV2 from "./components/SubjectDrawerV2";
 import ExperimentSwitcher from "./components/ExperimentSwitcher";
 import EnhancedExport from "./components/EnhancedExport";
 import TemplateSelector from "./components/TemplateSelector";
-import ScheduleTimeline from "./components/ScheduleTimeline";
 import TaskBoard from "./components/TaskBoard";
 import BackupDialog from "./components/BackupDialog";
 import SubjectSearch from "./components/SubjectSearch";
@@ -53,7 +51,6 @@ export default function AppV2() {
   const [experimentSwitcherOpen, setExperimentSwitcherOpen] = React.useState(false);
   const [templateSelectorOpen, setTemplateSelectorOpen] = React.useState(false);
   const [templateBuilderOpen, setTemplateBuilderOpen] = React.useState(false);
-  const [scheduleDialogOpen, setScheduleDialogOpen] = React.useState(false);
   const [taskBoardOpen, setTaskBoardOpen] = React.useState(false);
   const [backupOpen, setBackupOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -170,9 +167,6 @@ export default function AppV2() {
                 <MenuItem onClick={() => { setExperimentSwitcherOpen(true); handleCloseExpMenu(); }}>
                   Switch Experiment
                 </MenuItem>
-                <MenuItem onClick={() => { setScheduleDialogOpen(true); handleCloseExpMenu(); }}>
-                  View Schedule
-                </MenuItem>
               </Menu>
             </Stack>
   
@@ -212,12 +206,6 @@ export default function AppV2() {
               <Tooltip title="Tasks — due today / this week">
                 <IconButton color="inherit" onClick={() => setTaskBoardOpen(true)} size="small">
                   <ChecklistIcon />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Schedule">
-                <IconButton color="inherit" onClick={() => setScheduleDialogOpen(true)} size="small">
-                  <CalendarMonthIcon />
                 </IconButton>
               </Tooltip>
               
@@ -382,28 +370,6 @@ export default function AppV2() {
           onDeleteExperiment={api.deleteExperiment}
         />
 
-
-        <Dialog
-          open={scheduleDialogOpen}
-          onClose={() => setScheduleDialogOpen(false)}
-          maxWidth="lg"
-          fullWidth
-        >
-          <DialogTitle>
-            Experiment Schedule: {activeExperiment?.name}
-          </DialogTitle>
-          <DialogContent>
-            <ScheduleTimeline
-              experiment={activeExperiment}
-              subjects={subjects}
-              onUpdateSchedule={(schedule) => {
-                if (activeExperiment) {
-                  api.updateExperiment(activeExperiment.id, { schedule });
-                }
-              }}
-            />
-          </DialogContent>
-        </Dialog>
 
         <TemplateBuilderDialog
           open={templateBuilderOpen}
