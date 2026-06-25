@@ -14,6 +14,7 @@ import RedoIcon from "@mui/icons-material/Redo";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import SearchIcon from "@mui/icons-material/Search";
 import { theme } from "./theme";
 import { useAppStateV2 } from "./storage/useAppStateV2";
 import { getEnvironmentName } from "./storage/environment";
@@ -26,6 +27,7 @@ import TemplateSelector from "./components/TemplateSelector";
 import ScheduleTimeline from "./components/ScheduleTimeline";
 import TaskBoard from "./components/TaskBoard";
 import BackupDialog from "./components/BackupDialog";
+import SubjectSearch from "./components/SubjectSearch";
 import TemplateBuilderDialog from "./components/TemplateBuilder";
 import { BUILT_IN_TEMPLATES } from "./core/schema/builtInTemplates";
 
@@ -54,6 +56,7 @@ export default function AppV2() {
   const [scheduleDialogOpen, setScheduleDialogOpen] = React.useState(false);
   const [taskBoardOpen, setTaskBoardOpen] = React.useState(false);
   const [backupOpen, setBackupOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
   const [storageEnv] = React.useState(() => getEnvironmentName());
   const [expMenuAnchor, setExpMenuAnchor] = React.useState(null);
 
@@ -200,6 +203,12 @@ export default function AppV2() {
                 </span>
               </Tooltip>
               
+              <Tooltip title="Find animals">
+                <IconButton color="inherit" onClick={() => setSearchOpen(true)} size="small">
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
+
               <Tooltip title="Tasks — due today / this week">
                 <IconButton color="inherit" onClick={() => setTaskBoardOpen(true)} size="small">
                   <ChecklistIcon />
@@ -351,6 +360,15 @@ export default function AppV2() {
           onClose={() => setBackupOpen(false)}
           state={state}
           onRestore={api.importJson}
+        />
+
+        <SubjectSearch
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          subjects={subjects}
+          housingUnits={housingUnits}
+          experiment={activeExperiment}
+          onSelect={(s) => { setSelectedHousingId(s.housingUnitId); setSelectedSubject(s); }}
         />
 
         <ExperimentSwitcher
