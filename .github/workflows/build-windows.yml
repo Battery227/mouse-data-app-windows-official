@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Installers
 
 on:
   push:
@@ -6,8 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    runs-on: windows-2022
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            artifact-name: InVivoColonyManager-windows
+            artifact-path: |
+              src-tauri/target/release/bundle/nsis/*.exe
+              src-tauri/target/release/bundle/msi/*.msi
+          - os: macos-latest
+            artifact-name: InVivoColonyManager-mac
+            artifact-path: |
+              src-tauri/target/release/bundle/dmg/*.dmg
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +42,8 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             src-tauri/target
-          key: windows-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: windows-cargo-
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ${{ matrix.os }}-cargo-
 
       - name: Install dependencies
         run: npm ci
@@ -37,11 +51,9 @@ jobs:
       - name: Build Tauri app
         run: npm run tauri:build
 
-      - name: Upload installer artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: InVivoColonyManager-windows
-          path: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
